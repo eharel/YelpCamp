@@ -16,6 +16,8 @@ const options = {
     max_results: 500,
 };
 
+const seedSize = 300;
+
 mongoose.connect('mongodb://127.0.0.1:27017/yelp-camp');
 
 const db = mongoose.connection;
@@ -38,7 +40,7 @@ const seedDB = async () => {
         });
     });
 
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < seedSize; i++) {
         const random1000 = Math.floor(Math.random() * 1000);
         const numberOfImages = Math.floor(Math.random() * 4) + 1;
         const campgroundImages = [];
@@ -50,12 +52,16 @@ const seedDB = async () => {
         const price = Math.floor(Math.random() * 20) + 10;
         const randomCity = cities[random1000];
         const camp = new Campground({
-            location: `${(randomCity.city, randomCity.state)}`,
+            location: `${randomCity.city}, ${randomCity.state}`,
+            // location: `${cities[random1000].city}, ${cities[random1000].state}`,
             title: `${sample(descriptors)} ${sample(places)}`,
             images: campgroundImages,
             geometry: {
                 type: 'Point',
-                coordinates: [-63.4232213113435, -10.0755153440197]
+                coordinates: [
+                    cities[random1000].longitude,
+                    cities[random1000].latitude
+                ]
             },
             description:
                 "Lorem ipsum dolor sit amet consectetur adipisicing elit. Velit dolor, sed sit maiores, laudantium consequatur quia enim omnis amet totam quibusdam aspernatur optio. Quaerat asperiores vero minus, debitis maxime ea!",
