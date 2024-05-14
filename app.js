@@ -78,7 +78,7 @@ app.use('/campgrounds/:id/reviews', reviewRoutes);
 
 
 app.get('/', (req, res) => {
-    res.render('home')
+    res.redirect('/campgrounds')
 })
 
 app.all('*', (req, res, next) => {
@@ -92,5 +92,6 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(port, () => {
-    console.log('Serving on port ' + port);
+    const os = require("os");
+    console.log(`${os.EOL}Serving on port ${port}`);
 });
