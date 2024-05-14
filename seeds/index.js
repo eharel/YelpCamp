@@ -16,6 +16,8 @@ const options = {
     max_results: 500,
 };
 
+const seedSize = 300;
+
 mongoose.connect('mongodb://127.0.0.1:27017/yelp-camp');
 
 const db = mongoose.connection;
@@ -38,7 +40,7 @@ const seedDB = async () => {
         });
     });
 
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < seedSize; i++) {
         const random1000 = Math.floor(Math.random() * 1000);
         const numberOfImages = Math.floor(Math.random() * 4) + 1;
         const campgroundImages = [];
