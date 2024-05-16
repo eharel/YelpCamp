@@ -2,7 +2,6 @@ if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config();
 }
 
-const port = 3000;
 const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
@@ -18,12 +17,16 @@ const morgan = require('morgan')
 const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require('helmet');
 
+// const dbUrl = process.env.DB_URL;
+const dbUrl = process.env.DB_URL || 'mongodb://127.0.0.1:27017/yelp-camp';
 
 const userRoutes = require('./routes/users');
 const campgroundRoutes = require('./routes/campgrounds');
 const reviewRoutes = require('./routes/reviews');
 
-mongoose.connect('mongodb://127.0.0.1:27017/yelp-camp');
+const MongoStore = require('connect-mongo')
+
+mongoose.connect(dbUrl);
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
@@ -43,11 +46,27 @@ app.use(morgan('dev'))
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(mongoSanitize());
+app.use(mongoSanitize({
+    replaceWith: '_'
+}));
+
+
+const store = MongoStore.create({
+    mongoUrl: dbUrl,
+    touchAfter: 24 * 60 * 60,
+    crypto: {
+        secret: process.env.MONGO_SECRET
+    }
+});
+
+store.on('error', function (e) {
+    console.log("Session store error!", e);
+})
 
 const sessionConfig = {
+    store,
     name: 'session',
-    secret: 'thisshouldbeabettersecret!',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
     cookie: {
@@ -147,6 +166,7 @@ app.use((err, req, res, next) => {
     res.status(statusCode).render('error', { err });
 });
 
+const port = process.env.PORT || 3000;
 app.listen(port, () => {
     const os = require("os");
     console.log(`${os.EOL}Serving on port ${port}`);
